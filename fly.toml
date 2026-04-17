@@ -1,0 +1,46 @@
+# Fly.io config for the AstroTick dashboard (frontend UI).
+#
+# First deploy:
+#     fly launch --no-deploy --copy-config --name <your-app-name>
+#     fly deploy
+#
+# Rename `app` below to the unique name you picked in `fly launch`.
+# `primary_region` is a Fly region code (see `fly platform regions`).
+
+app = "astrotick-dashboard"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  # gunicorn binds to $PORT; dashboard.py honors it too when run directly.
+  PORT = "8080"
+  DASHBOARD_REFRESH_MS = "3000"
+  DASHBOARD_TRADE_LIMIT = "50"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/api/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+  cpus = 1
+
+# To run the bot alongside the dashboard in a second process, add a
+# [processes] table (bot = "python bot.py", app = "gunicorn ...") and
+# set secrets via `fly secrets set KALSHI_API_KEY_ID=... KALSHI_PRIVATE_KEY_PATH=...`.
+# The bot requires persistent state (dashboard_state.json, trades.csv) - attach
+# a Fly volume at /app if you want it to survive restarts.

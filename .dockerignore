@@ -1,0 +1,17 @@
+.git
+.github
+.gitignore
+.cursor
+tests/
+*.md
+.env
+.env.*
+!.env.example
+dashboard_state.json
+**/__pycache__/
+*.pyc
+*.pyo
+*.log
+venv/
+.venv/
+kalshi_private_key.pem
